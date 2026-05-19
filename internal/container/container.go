@@ -1266,18 +1266,8 @@ func NewDuckDB() (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to open duckdb: %w", err)
 	}
 
-	// Try to install and load required extensions.
-	//   - spatial: used for st_read_meta() to enumerate layer (sheet) names from .xlsx/.xls
-	//   - excel:   used for read_xlsx() which gives proper type inference per sheet
-	bgCtx := context.Background()
-	for _, ext := range []string{"spatial", "excel"} {
-		if _, err := sqlDB.ExecContext(bgCtx, fmt.Sprintf("INSTALL %s;", ext)); err != nil {
-			logger.Warnf(bgCtx, "[DuckDB] Failed to install %s extension: %v", ext, err)
-		}
-		if _, err := sqlDB.ExecContext(bgCtx, fmt.Sprintf("LOAD %s;", ext)); err != nil {
-			logger.Warnf(bgCtx, "[DuckDB] Failed to load %s extension: %v", ext, err)
-		}
-	}
+	// Skip extension installation for now to avoid network timeout issues
+	logger.Info(context.Background(), "[DuckDB] Started without optional extensions")
 
 	return sqlDB, nil
 }
